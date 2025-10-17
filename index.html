@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивті Математика Курсы</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+        :root {
+            --bg-color: #1a1a2e;
+            --card-bg-color: #16213e;
+            --text-color: #e0e0e0;
+            --primary-color: #0f3460;
+            --accent-color-1: #e94560;
+            --gradient-start: #8e44ad;
+            --gradient-end: #3498db;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-color);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%2316213e' fill-opacity='0.4'%3E%3Cpath fill-rule='evenodd' d='M11 0l5 20H6l5-20zm42 31h20l-5 20h-20l5-20zm-22 25h20l-5 20h-20l5-20z M0 5l20-5 -5 20-20 5zm80 0l-20-5 5 20 20 5zM21 80l20-5-5-20-20 5zm40 0l20-5-5-20-20 5z'/%3E%3C/g%3E%3C/svg%3E");
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 0 10px var(--accent-color-1);
+        }
+
+        .progress-section {
+            background-color: var(--card-bg-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-section h2 {
+            margin-top: 0;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #2c3e50;
+            border-radius: 25px;
+            overflow: hidden;
+            height: 25px;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: white;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .lesson-card {
+            background-color: var(--card-bg-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border-left: 5px solid transparent;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .lesson-card.completed {
+            border-left: 5px solid var(--gradient-end);
+        }
+
+        .lesson-card h3 {
+            margin-top: 0;
+            font-size: 1.3em;
+            color: white;
+        }
+        
+        .lesson-actions {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .lesson-links {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .lesson-links a {
+            text-decoration: none;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex-grow: 1;
+        }
+        
+        .video-link {
+            background-color: var(--primary-color);
+        }
+        .video-link:hover {
+            background-color: #1a4a8a;
+        }
+
+        .homework-btn {
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            box-shadow: 0 4px 10px rgba(142, 68, 173, 0.4);
+        }
+        
+        .homework-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.5);
+        }
+
+        .progress-checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-checkbox-container input {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--gradient-end);
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Математика Курсы</h1>
+        </header>
+
+        <section class="progress-section">
+            <h2>Сіздің прогрессіңіз</h2>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar">0%</div>
+            </div>
+        </section>
+
+        <main class="course-grid" id="courseGrid">
+            </main>
+    </div>
+
+    <script>
+        const courseData = [
+            { lesson: 1, video: 'https://www.youtube.com/watch?v=L14Ef4XNUiE', homework: 'https://drive.google.com/file/d/12or8f_KloqF-ADdHHTfsHmqB0rZPjv0d/view?usp=sharing' },
+            { lesson: 2, video: 'https://youtu.be/lZ1fIuAUvoU', homework: 'https://drive.google.com/file/d/1cUd4lz3SwfnNokcOFID-gHXl1rn_iHTs/view?usp=sharing' },
+            { lesson: 3, video: 'https://youtu.be/JyYO_RgOVzM', homework: 'https://drive.google.com/file/d/1qDiTrkHkGCGxCfG42IbSekfep8UncS65/view?usp=sharing' },
+            { lesson: 4, video: 'https://youtu.be/-0DwOFr6KoQ', homework: 'https://drive.google.com/file/d/1EI_cNvJPnG3hZw0Lt1nvIq7b1FmyHULF/view?usp=sharing' },
+            { lesson: 5, video: 'https://youtu.be/AyG-cp9Vgjk', homework: 'https://drive.google.com/file/d/1RQG1yFGxQjDkScnZzs-o-_EKKUp1oxBc/view?usp=sharing' },
+            { lesson: 6, video: 'https://youtu.be/r5uE_hfMhSY', homework: 'https://drive.google.com/file/d/1DNS6cLa5VYeYJiMK5jVsq-RVZyJPr6AJ/view?usp=sharing' },
+            { lesson: 7, video: 'https://youtu.be/hKU_GdtC_8I', homework: 'https://drive.google.com/file/d/1HDN5we9QfP0MxA7lpTRsWK3xN1biZU8x/view?usp=sharing' },
+            { lesson: 8, video: 'https://youtu.be/4gbTyCtB-xQ', homework: 'https://drive.google.com/file/d/1W8QeTomo73m3Y-wFFUWNPJ1QKcESCyry/view?usp=sharing' },
+            { lesson: 9, video: 'https://youtu.be/vugvvFlvkyg', homework: 'https://drive.google.com/file/d/11sH3w3Csrqhka7rRDHiRoDGecPx11JJH/view?usp=sharing' },
+            { lesson: 10, video: 'https://youtu.be/I0WwWXfvlUY', homework: 'https://drive.google.com/file/d/11sH3w3Csrqhka7rRDHiRoDGecPx11JJH/view?usp=sharing' },
+            { lesson: 11, video: 'https://youtu.be/xh22Z_4I5Lg', homework: 'https://drive.google.com/file/d/1Wh7P_Fz8lhoDl5nlb5C5WDgmyqa0Qnna/view?usp=sharing' },
+            { lesson: 12, video: 'https://youtu.be/UKP7Wt2-U2M', homework: 'https://drive.google.com/file/d/1NHJTn-cKDTliElPstJqr4MuoMvQmaPai/view?usp=sharing' },
+            { lesson: 13, video: 'https://youtu.be/WrRCQaRktRs', homework: 'https://drive.google.com/file/d/1h7xj40OxpkGeLzBeqQxT2f-TNwdZOJE9/view?usp=sharing' },
+            { lesson: 14, video: 'https://youtu.be/t9vDWy-h_nQ', homework: null },
+            { lesson: 15, video: 'https://youtu.be/NIvFXIdjDDU', homework: null },
+            { lesson: 16, video: 'https://youtu.be/eciVBVMv3Vo', homework: 'https://drive.google.com/file/d/13lg7xuyXqjUNBZzVFOQtVNbbXtAxEg7A/view?usp=sharing' },
+        ];
+
+        const courseGrid = document.getElementById('courseGrid');
+        const progressBar = document.getElementById('progressBar');
+        const totalLessons = courseData.length;
+        let progressState = [];
+
+        function generateCourseCards() {
+            courseData.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'lesson-card';
+                card.id = `lesson-card-${index}`;
+
+                let homeworkButton = '';
+                if (item.homework) {
+                    homeworkButton = `<a href="${item.homework}" target="_blank" class="homework-btn">Үй тапсырмасы</a>`;
+                }
+
+                card.innerHTML = `
+                    <h3>${item.lesson}-сабақ</h3>
+                    <div class="lesson-actions">
+                         <label class="progress-checkbox-container" for="lesson-${index}">
+                            <input type="checkbox" class="progress-checkbox" id="lesson-${index}" data-index="${index}">
+                            Орындалды
+                        </label>
+                        <div class="lesson-links">
+                            <a href="${item.video}" target="_blank" class="video-link">Видеоны көру</a>
+                            ${homeworkButton}
+                        </div>
+                    </div>
+                `;
+                courseGrid.appendChild(card);
+            });
+        }
+
+        function updateProgress() {
+            const checkedBoxes = document.querySelectorAll('.progress-checkbox:checked').length;
+            const percentage = totalLessons > 0 ? Math.round((checkedBoxes / totalLessons) * 100) : 0;
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = percentage + '%';
+            
+            // Карточкалардың стилін жаңарту
+            document.querySelectorAll('.progress-checkbox').forEach((checkbox, index) => {
+                 const card = document.getElementById(`lesson-card-${index}`);
+                 if (checkbox.checked) {
+                     card.classList.add('completed');
+                 } else {
+                     card.classList.remove('completed');
+                 }
+            });
+
+            saveProgress();
+        }
+        
+        function saveProgress() {
+            progressState = [];
+            document.querySelectorAll('.progress-checkbox').forEach(checkbox => {
+                progressState.push(checkbox.checked);
+            });
+            localStorage.setItem('mathCourseProgress', JSON.stringify(progressState));
+        }
+
+        function loadProgress() {
+            const savedProgress = JSON.parse(localStorage.getItem('mathCourseProgress'));
+            if (savedProgress && savedProgress.length === totalLessons) {
+                progressState = savedProgress;
+                document.querySelectorAll('.progress-checkbox').forEach((checkbox, index) => {
+                    checkbox.checked = progressState[index] || false;
+                });
+            }
+        }
+        
+        // Бастапқы жүктеу
+        document.addEventListener('DOMContentLoaded', () => {
+            generateCourseCards();
+            loadProgress();
+            updateProgress();
+
+            courseGrid.addEventListener('change', (e) => {
+                if (e.target.classList.contains('progress-checkbox')) {
+                    updateProgress();
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
