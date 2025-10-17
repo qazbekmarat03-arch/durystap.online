@@ -4,45 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Интерактивті Математика Курсы</title>
-
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
-    <script>
-        // СІЗДІҢ FIREBASE CONFIG ДЕРЕКТЕРІҢІЗДІ ОСЫ ЖЕРГЕ ҚОЙЫҢЫЗ
-        const firebaseConfig = {
-            apiKey: "СІЗДІҢ_API_KEY",
-            authDomain: "СІЗДІҢ_PROJECT_ID.firebaseapp.com",
-            projectId: "СІЗДІҢ_PROJECT_ID",
-            storageBucket: "СІЗДІҢ_PROJECT_ID.appspot.com",
-            messagingSenderId: "СІЗДІҢ_SENDER_ID",
-            appId: "СІЗДІҢ_APP_ID"
-        };
-        
-        // Firebase-ті инициализациялау
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-
-        // Қолданушының кіру статусын тексеру
-        auth.onAuthStateChanged((user) => {
-            if (!user) {
-                // Егер қолданушы кірмеген болса, login бетіне бағыттау
-                window.location.href = 'login.html';
-            } else {
-                // Қолданушы кірген болса, контентті көрсету
-                document.querySelector('.container').style.visibility = 'visible';
-                // Прогресс жүйесін тек қолданушы кіргенде ғана іске қосу
-                initializeCourseContent(user.uid);
-            }
-        });
-
-        // Шығу функциясы
-        function logout() {
-            auth.signOut().then(() => {
-                // Сәтті шыққаннан кейін login бетіне бағыттау
-                window.location.href = 'login.html';
-            });
-        }
-    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
 
@@ -71,13 +32,11 @@
         .container {
             width: 100%;
             max-width: 1200px;
-            visibility: hidden; /* Контент бастапқыда жасырылады */
         }
 
         header {
             text-align: center;
             margin-bottom: 30px;
-            position: relative; /* Шығу батырмасы үшін */
         }
 
         header h1 {
@@ -85,24 +44,6 @@
             font-weight: 700;
             color: white;
             text-shadow: 0 0 10px var(--accent-color-1);
-        }
-
-        #logoutButton {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background-color: var(--accent-color-1);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-        #logoutButton:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
         }
 
         .progress-section {
@@ -233,7 +174,6 @@
     <div class="container">
         <header>
             <h1>Математика Курсы</h1>
-            <button id="logoutButton" onclick="logout()">Шығу</button>
         </header>
 
         <section class="progress-section">
@@ -272,77 +212,73 @@
         const totalLessons = courseData.length;
         let progressState = [];
 
-        // Прогресс функцияларын инициализациялау
-        function initializeCourseContent(userUid) {
-            // Прогрессті сақтау кілтін оқушыға байланыстыру
-            const progressStorageKey = `mathCourseProgress_${userUid}`;
+        function generateCourseCards() {
+            courseData.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'lesson-card';
+                card.id = `lesson-card-${index}`;
 
-            function generateCourseCards() {
-                courseData.forEach((item, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'lesson-card';
-                    card.id = `lesson-card-${index}`;
-
-                    let homeworkButton = '';
-                    if (item.homework) {
-                        homeworkButton = `<a href="${item.homework}" target="_blank" class="homework-btn">Үй тапсырмасы</a>`;
-                    }
-
-                    card.innerHTML = `
-                        <h3>${item.lesson}-сабақ</h3>
-                        <div class="lesson-actions">
-                            <label class="progress-checkbox-container" for="lesson-${index}">
-                                <input type="checkbox" class="progress-checkbox" id="lesson-${index}" data-index="${index}">
-                                Орындалды
-                            </label>
-                            <div class="lesson-links">
-                                <a href="${item.video}" target="_blank" class="video-link">Видеоны көру</a>
-                                ${homeworkButton}
-                            </div>
-                        </div>
-                    `;
-                    courseGrid.appendChild(card);
-                });
-            }
-
-            function updateProgress() {
-                const checkedBoxes = document.querySelectorAll('.progress-checkbox:checked').length;
-                const percentage = totalLessons > 0 ? Math.round((checkedBoxes / totalLessons) * 100) : 0;
-                progressBar.style.width = percentage + '%';
-                progressBar.textContent = percentage + '%';
-                
-                // Карточкалардың стилін жаңарту
-                document.querySelectorAll('.progress-checkbox').forEach((checkbox, index) => {
-                    const card = document.getElementById(`lesson-card-${index}`);
-                    if (checkbox.checked) {
-                        card.classList.add('completed');
-                    } else {
-                        card.classList.remove('completed');
-                    }
-                });
-
-                saveProgress();
-            }
-            
-            function saveProgress() {
-                progressState = [];
-                document.querySelectorAll('.progress-checkbox').forEach(checkbox => {
-                    progressState.push(checkbox.checked);
-                });
-                localStorage.setItem(progressStorageKey, JSON.stringify(progressState));
-            }
-
-            function loadProgress() {
-                const savedProgress = JSON.parse(localStorage.getItem(progressStorageKey));
-                if (savedProgress && savedProgress.length === totalLessons) {
-                    progressState = savedProgress;
-                    document.querySelectorAll('.progress-checkbox').forEach((checkbox, index) => {
-                        checkbox.checked = progressState[index] || false;
-                    });
+                let homeworkButton = '';
+                if (item.homework) {
+                    homeworkButton = `<a href="${item.homework}" target="_blank" class="homework-btn">Үй тапсырмасы</a>`;
                 }
-            }
+
+                card.innerHTML = `
+                    <h3>${item.lesson}-сабақ</h3>
+                    <div class="lesson-actions">
+                         <label class="progress-checkbox-container" for="lesson-${index}">
+                            <input type="checkbox" class="progress-checkbox" id="lesson-${index}" data-index="${index}">
+                            Орындалды
+                        </label>
+                        <div class="lesson-links">
+                            <a href="${item.video}" target="_blank" class="video-link">Видеоны көру</a>
+                            ${homeworkButton}
+                        </div>
+                    </div>
+                `;
+                courseGrid.appendChild(card);
+            });
+        }
+
+        function updateProgress() {
+            const checkedBoxes = document.querySelectorAll('.progress-checkbox:checked').length;
+            const percentage = totalLessons > 0 ? Math.round((checkedBoxes / totalLessons) * 100) : 0;
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = percentage + '%';
             
-            // Бастапқы жүктеу
+            // Карточкалардың стилін жаңарту
+            document.querySelectorAll('.progress-checkbox').forEach((checkbox, index) => {
+                 const card = document.getElementById(`lesson-card-${index}`);
+                 if (checkbox.checked) {
+                     card.classList.add('completed');
+                 } else {
+                     card.classList.remove('completed');
+                 }
+            });
+
+            saveProgress();
+        }
+        
+        function saveProgress() {
+            progressState = [];
+            document.querySelectorAll('.progress-checkbox').forEach(checkbox => {
+                progressState.push(checkbox.checked);
+            });
+            localStorage.setItem('mathCourseProgress', JSON.stringify(progressState));
+        }
+
+        function loadProgress() {
+            const savedProgress = JSON.parse(localStorage.getItem('mathCourseProgress'));
+            if (savedProgress && savedProgress.length === totalLessons) {
+                progressState = savedProgress;
+                document.querySelectorAll('.progress-checkbox').forEach((checkbox, index) => {
+                    checkbox.checked = progressState[index] || false;
+                });
+            }
+        }
+        
+        // Бастапқы жүктеу
+        document.addEventListener('DOMContentLoaded', () => {
             generateCourseCards();
             loadProgress();
             updateProgress();
@@ -352,7 +288,8 @@
                     updateProgress();
                 }
             });
-        }
+        });
+
     </script>
 </body>
 </html>
