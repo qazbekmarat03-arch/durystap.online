@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кіру немесе Тіркелу</title>     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+        :root {
+            --bg-color: #1a1a2e;
+            --card-bg-color: #16213e;
+            --text-color: #e0e0e0;
+            --primary-color: #0f3460;
+            --accent-color-1: #e94560;
+            --gradient-start: #8e44ad;
+            --gradient-end: #3498db;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-color);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%2316213e' fill-opacity='0.4'%3E%3Cpath fill-rule='evenodd' d='M11 0l5 20H6l5-20zm42 31h20l-5 20h-20l5-20zm-22 25h20l-5 20h-20l5-20z M0 5l20-5 -5 20-20 5zm80 0l-20-5 5 20 20 5zM21 80l20-5-5-20-20 5zm40 0l20-5-5-20-20 5z'/%3E%3C/g%3E%3C/svg%3E");
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* Ортаға орналастыру үшін */
+            min-height: 100vh; /* Беттің толық биіктігін алу үшін */
+        }
+
+        /* Мазмұнды жасыру үшін стиль */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Авторизация контейнерінің стилі */
+        #auth-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: var(--card-bg-color);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        #auth-container h2 { margin-top: 0; color: white; }
+        #auth-container input {
+            width: calc(100% - 24px); padding: 12px; margin-bottom: 15px; border: 1px solid #3a3a5a;
+            border-radius: 8px; background-color: #2c2c4a; color: var(--text-color); font-size: 1em;
+        }
+        #auth-container button {
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            color: white; border: none; padding: 14px 20px; border-radius: 8px;
+            font-size: 1em; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px;
+        }
+        #auth-container .toggle-form { color: var(--gradient-end); cursor: pointer; margin-top: 20px; display: block; }
+        #auth-container .error-message { color: var(--accent-color-1); margin-top: 15px; min-height: 20px; }
+
+    </style>
+</head>
+<body>
+    
+    <div id="auth-container">
+        <div id="login-form">
+            <h2>Кіру</h2>
+            <input type="email" id="loginEmail" placeholder="Email">
+            <input type="password" id="loginPassword" placeholder="Құпиясөз">
+            <button onclick="logIn()">Кіру</button>
+            <p class="error-message" id="loginError"></p>
+            <a class="toggle-form" onclick="toggleForms()">Тіркелу керек пе?</a>
+        </div>
+        <div id="signup-form" class="hidden">
+            <h2>Тіркелу</h2>
+            <input type="email" id="signupEmail" placeholder="Email">
+            <input type="password" id="signupPassword" placeholder="Құпиясөз">
+            <button onclick="signUp()">Тіркелу</button>
+            <p class="error-message" id="signupError"></p>
+            <a class="toggle-form" onclick="toggleForms()">Аккаунтыңыз бар ма?</a>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAAM6A2s4VYX-61k4Y7emNGxkZKa-4obJU",
+            authDomain: "math-course-4de59.firebaseapp.com",
+            projectId: "math-course-4de59",
+            storageBucket: "math-course-4de59.firebasestorage.app",
+            messagingSenderId: "75052804191",
+            appId: "1:75052804191:web:4de799ef20364255bfd3ea"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        const authContainer = document.getElementById('auth-container');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // Қолданушы кірген болса, дереу index.html-ге бағыттау
+                window.location.href = 'index.html';
+            } else {
+                // Қолданушы кірмеген болса, авторизация формасын көрсету
+                authContainer.classList.remove('hidden');
+            }
+        });
+
+        function signUp() {
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const errorElement = document.getElementById('signupError');
+
+            if (!email || !password) {
+                errorElement.textContent = "Email мен құпиясөзді толтырыңыз.";
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    console.log('Сәтті тіркелді:', userCredential.user);
+                    errorElement.textContent = '';
+                    window.location.href = 'index.html'; 
+                })
+                .catch(error => {
+                    console.error('Тіркелу қатесі:', error.message);
+                    errorElement.textContent = error.message;
+                });
+        }
+
+        function logIn() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorElement = document.getElementById('loginError');
+
+            if (!email || !password) {
+                errorElement.textContent = "Email мен құпиясөзді толтырыңыз.";
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    console.log('Сәтті кірді:', userCredential.user);
+                    errorElement.textContent = '';
+                    window.location.href = 'index.html';
+                })
+                .catch(error => {
+                    console.error('Кіру қатесі:', error.message);
+                    errorElement.textContent = error.message;
+                });
+        }
+        
+        function toggleForms() {
+            loginForm.classList.toggle('hidden');
+            signupForm.classList.toggle('hidden');
+            document.getElementById('loginError').textContent = ''; // Қателерді тазарту
+            document.getElementById('signupError').textContent = ''; // Қателерді тазарту
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('signupEmail').value = '';
+            document.getElementById('signupPassword').value = '';
+        }
+    </script>
+</body>
+</html>
